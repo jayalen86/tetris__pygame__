@@ -135,6 +135,7 @@ class tetris():
         self.level = 1
         self.blocks_on_screen = []
         self.gameover = False
+        self.paused = False
 
     def redraw_screen(self, screen, piece, next_piece):
         screen.fill((0,0,0))
@@ -291,6 +292,7 @@ class tetris():
         if len(rows_to_delete) > 0:
             rows_to_delete.sort()
             self.adjust_rows(rows_to_delete)
+            return True
             
     def remove_row_from_list(self, row):
         new_list = []
@@ -314,6 +316,25 @@ class tetris():
         for x in self.blocks_on_screen:
             if x[0] < 0:
                 self.gameover = True
+                return True
+
+    def draw_gameover_screen(self, screen):
+        screen.fill((0,0,0))
+        font1 = pygame.font.Font(pygame.font.get_default_font(), 36)
+        font2 = pygame.font.Font(pygame.font.get_default_font(), 28)
+        text1 = font1.render("Gameover!", True, (255,255,255))
+        text2 = font2.render("(Press 'r' to Restart)", True, (255,255,255))
+        screen.blit(text1, (250-text1.get_width()/2, 210))
+        screen.blit(text2, (250-text2.get_width()/2, 255))
+        pygame.display.update()
+
+    def reset(self):
+        self.lines = 0
+        self.level = 1
+        self.paused = False
+        self.gameover = False
+        del self.blocks_on_screen[:]
+        
         
          
 def main():
@@ -326,6 +347,8 @@ def main():
     screen_height = 550
     screen_width = 500
     screen = pygame.display.set_mode((screen_width, screen_height))
+    clear_row_sound = pygame.mixer.Sound("sounds/clear_row.wav")
+    gameover_sound = pygame.mixer.Sound("sounds/gameover.wav")
     clock = pygame.time.Clock()
     game = tetris()
     game_running = True
@@ -338,21 +361,37 @@ def main():
                 game_running = False
         if game_running == False:
             break
+        
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            game.move_left(current_piece[0])
-        if keys[pygame.K_RIGHT]:
-            game.move_right(current_piece[0])
-        if keys[pygame.K_SPACE]:
-            game.rotate_piece(current_piece[0])
-        grid = game.redraw_screen(screen, current_piece[0], current_piece[1])
-        collision = game.check_collision(current_piece[0])
-        if collision == False:
-            game.move_down(current_piece[0])
+        if game.paused == True:
+            if keys[pygame.K_p]:
+                game.paused = False
+            continue    
+
+        if game.gameover == False:
+            if keys[pygame.K_LEFT]:
+                game.move_left(current_piece[0])
+            if keys[pygame.K_RIGHT]:
+                game.move_right(current_piece[0])
+            if keys[pygame.K_SPACE]:
+                game.rotate_piece(current_piece[0])
+            if keys[pygame.K_p]:
+                game.paused = True
+            grid = game.redraw_screen(screen, current_piece[0], current_piece[1])
+            collision = game.check_collision(current_piece[0])
+            if collision == False:
+                game.move_down(current_piece[0])
+            else:
+                del current_piece[0]
+                current_piece.append(piece())
+                
+            if game.clear_rows() == True:
+                pygame.mixer.Sound.play(clear_row_sound)
+            if game.check_gameover() == True:
+                pygame.mixer.Sound.play(gameover_sound)
         else:
-            del current_piece[0]
-            current_piece.append(piece())
-        game.clear_rows()
-        game.check_gameover()
+            game.draw_gameover_screen(screen)
+            if keys[pygame.K_r]:
+                game.reset()
             
 main()
