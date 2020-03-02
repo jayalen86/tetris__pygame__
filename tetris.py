@@ -332,24 +332,7 @@ class tetris():
         pygame.display.update()
         
     def get_fall_speed(self):
-        if self.level == 1:
-            fall_speed = 2
-        elif self.level == 2:
-            fall_speed = 3
-        elif self.level == 3:
-            fall_speed = 4
-        elif self.level == 4:
-            fall_speed = 5
-        elif self.level == 5:
-            fall_speed = 6
-        elif self.level == 6:
-            fall_speed = 7
-        elif self.level == 7:
-            fall_speed = 8
-        elif self.level == 8:
-            fall.speed = 9
-        elif self.level >= 9:
-            fall_speed = 10
+        fall_speed = 10 if self.level >= 9 else self.level + 1
         return fall_speed
 
     def reset(self):
