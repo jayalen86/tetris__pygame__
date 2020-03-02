@@ -270,11 +270,11 @@ class tetris():
                 return True
         return False
 
-    def move_down(self, piece, fall_time):
-        if fall_time >= 10:
-            fall_time = 0
+    def move_down(self, piece, fall_timer):
+        if fall_timer >= 10:
+            fall_timer = 0
             piece.y += 1
-        return fall_time
+        return fall_timer
         
     def clear_rows(self):
         rows_to_delete = []
@@ -377,10 +377,10 @@ def main():
     game = tetris()
     game_running = True
     current_piece = [piece(), piece()]
-    fall_time = 0
+    fall_timer = 0
     while game_running:
         clock.tick(10)
-        fall_time += game.get_fall_speed()
+        fall_timer += game.get_fall_speed()
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -404,11 +404,11 @@ def main():
             if keys[pygame.K_p]:
                 game.paused = True
             if keys[pygame.K_DOWN]:
-                fall_time += 10
+                fall_timer += 10
             grid = game.redraw_screen(screen, current_piece[0], current_piece[1])
             collision = game.check_collision(current_piece[0])
             if collision == False:
-                fall_time = game.move_down(current_piece[0], fall_time)
+                fall_timer = game.move_down(current_piece[0], fall_timer)
             else:
                 del current_piece[0]
                 current_piece.append(piece())
