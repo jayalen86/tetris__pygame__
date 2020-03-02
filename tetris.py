@@ -270,8 +270,11 @@ class tetris():
                 return True
         return False
 
-    def move_down(self,piece):
-         piece.y += 1
+    def move_down(self, piece, fall_time):
+        if fall_time >= 10:
+            fall_time = 0
+            piece.y += 1
+        return fall_time
         
     def clear_rows(self):
         rows_to_delete = []
@@ -327,6 +330,27 @@ class tetris():
         screen.blit(text1, (250-text1.get_width()/2, 210))
         screen.blit(text2, (250-text2.get_width()/2, 255))
         pygame.display.update()
+        
+    def get_fall_speed(self):
+        if self.level == 1:
+            fall_speed = 2
+        elif self.level == 2:
+            fall_speed = 3
+        elif self.level == 3:
+            fall_speed = 4
+        elif self.level == 4:
+            fall_speed = 5
+        elif self.level == 5:
+            fall_speed = 6
+        elif self.level == 6:
+            fall_speed = 7
+        elif self.level == 7:
+            fall_speed = 8
+        elif self.level == 8:
+            fall.speed = 9
+        elif self.level >= 9:
+            fall_speed = 10
+        return fall_speed
 
     def reset(self):
         self.lines = 0
@@ -336,7 +360,7 @@ class tetris():
         del self.blocks_on_screen[:]
         
         
-         
+   #fall_time/1000 >= fall_speed:      
 def main():
     pygame.mixer.pre_init(44100, -16, 1, 512) #used to fix sound delay
     pygame.init()
@@ -353,8 +377,10 @@ def main():
     game = tetris()
     game_running = True
     current_piece = [piece(), piece()]
+    fall_time = 0
     while game_running:
-        clock.tick(5)
+        clock.tick(10)
+        fall_time += game.get_fall_speed()
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -377,10 +403,12 @@ def main():
                 game.rotate_piece(current_piece[0])
             if keys[pygame.K_p]:
                 game.paused = True
+            if keys[pygame.K_DOWN]:
+                fall_time += 10
             grid = game.redraw_screen(screen, current_piece[0], current_piece[1])
             collision = game.check_collision(current_piece[0])
             if collision == False:
-                game.move_down(current_piece[0])
+                fall_time = game.move_down(current_piece[0], fall_time)
             else:
                 del current_piece[0]
                 current_piece.append(piece())
