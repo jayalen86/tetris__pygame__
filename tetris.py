@@ -1,6 +1,6 @@
 import pygame
 import random
-
+#pieces
 square = [
     [
      [0,0],
